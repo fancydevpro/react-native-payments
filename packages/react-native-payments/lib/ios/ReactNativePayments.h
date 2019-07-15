@@ -28,6 +28,9 @@
 - (NSArray<PKShippingMethod *> *_Nonnull)getShippingMethodsFromDetails:(NSDictionary *_Nonnull)details;
 - (PKPaymentSummaryItem *_Nonnull)convertDisplayItemToPaymentSummaryItem:(NSDictionary *_Nonnull)displayItem;
 - (PKShippingMethod *_Nonnull)convertShippingOptionToShippingMethod:(NSDictionary *_Nonnull)shippingOption;
+/*************************************************************************/
+- (NSString *_Nonnull)contactToString:(PKContact *_Nonnull)contact;
+/*************************************************************************/
 - (void)handleUserAccept:(PKPayment *_Nonnull)payment
             paymentToken:(NSString *_Nullable)token;
 - (void)handleGatewayError:(NSError *_Nonnull)error;

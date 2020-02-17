@@ -48,6 +48,9 @@ import {
   MODULE_SCOPING,
   SHIPPING_ADDRESS_CHANGE_EVENT,
   SHIPPING_OPTION_CHANGE_EVENT,
+  /**************************************************************/
+  FIRST_UPDATE_CHANGE_EVENT,
+  /**************************************************************/
   INTERNAL_SHIPPING_ADDRESS_CHANGE_EVENT,
   INTERNAL_SHIPPING_OPTION_CHANGE_EVENT,
   USER_DISMISS_EVENT,
@@ -256,6 +259,12 @@ export default class PaymentRequest {
     }
   }
 
+  /**************************************************************/
+  _handleFirstUpdate() {
+    return this._firstUpdateFn();
+  }
+  /**************************************************************/
+
   _handleShippingAddressChange(postalAddress: PaymentAddress) {
     this._shippingAddress = postalAddress;
 
@@ -298,14 +307,31 @@ export default class PaymentRequest {
   _getPlatformDetailsIOS(details: PaymentDetailsIOSRaw): PaymentDetailsIOS {
     const {
       paymentData: serializedPaymentData,
+      billingContact: serializedBillingContact,
+      shippingContact: serializedShippingContact,
       paymentToken,
       transactionIdentifier,
     } = details;
 
     const isSimulator = transactionIdentifier === 'Simulated Identifier';
 
+    let billingContact = null;
+    let shippingContact = null;
+     if (serializedBillingContact && serializedBillingContact !== ""){
+      try{
+        billingContact = JSON.parse(serializedBillingContact);
+      }catch(e){}
+    }
+     if (serializedShippingContact && serializedShippingContact !== ""){
+      try{
+        shippingContact = JSON.parse(serializedShippingContact);
+      }catch(e){}
+    }
+
     return {
       paymentData: isSimulator ? null : JSON.parse(serializedPaymentData),
+      billingContact,
+      shippingContact,
       paymentToken,
       transactionIdentifier,
     };
@@ -398,7 +424,7 @@ export default class PaymentRequest {
   // https://www.w3.org/TR/payment-request/#onshippingaddresschange-attribute
   // https://www.w3.org/TR/payment-request/#onshippingoptionchange-attribute
   addEventListener(
-    eventName: 'shippingaddresschange' | 'shippingoptionchange',
+    eventName: 'shippingaddresschange' | 'shippingoptionchange' | 'firstupdate',
     fn: e => Promise<any>
   ) {
     if (eventName === SHIPPING_ADDRESS_CHANGE_EVENT) {
@@ -408,6 +434,12 @@ export default class PaymentRequest {
     if (eventName === SHIPPING_OPTION_CHANGE_EVENT) {
       return (this._shippingOptionChangeFn = fn.bind(this));
     }
+
+    /**************************************************************/
+    if (eventName === FIRST_UPDATE_CHANGE_EVENT) {
+      return (this._firstUpdateFn = fn.bind(this));
+    }
+    /**************************************************************/
   }
 
   // https://www.w3.org/TR/payment-request/#id-attribute

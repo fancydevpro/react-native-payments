@@ -57,10 +57,20 @@ export default class PaymentRequestUpdateEvent {
 
     this._handleDetailsChange = this._handleDetailsChange.bind(this);
     this._resetEvent = this._resetEvent.bind(this);
+    /**********************************************************/
+    this.firstUpdate = true
+    /**********************************************************/
   }
 
   _handleDetailsChange(value: PaymentDetailsBase) {
     const target = this.target;
+
+    /**********************************************************/
+    if (this.firstUpdate) {
+      this.firstUpdate = false
+      value = target._handleFirstUpdate()
+    }
+    /**********************************************************/
 
     validateTotal(value.total, DOMException);
     validateDisplayItems(value.displayItems, DOMException);
@@ -128,7 +138,8 @@ export default class PaymentRequestUpdateEvent {
         // On iOS the `selectedShippingMethod` defaults back to the first option
         // when updating shippingMethods.  So we call the `_handleShippingOptionChange`
         // method with the first shippingOption id so that JS is in sync with Apple Pay.
-        .then(() => {
+        /*************************************************************************/
+        /*.then(() => {
           if (Platform.OS !== 'ios') {
             return;
           }
@@ -141,7 +152,8 @@ export default class PaymentRequestUpdateEvent {
               selectedShippingOptionId: target._details.shippingOptions[0].id
             });
           }
-        })
+        })*/
+        /*************************************************************************/
         // 13. Upon rejection of detailsPromise:
         .catch(e => {
           this._resetEvent();

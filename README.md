@@ -256,14 +256,15 @@ const OPTIONS = {
 };
 ```
 
-### Requesting a Shipping Address
+### Requesting a Shipping Address (or Billing Address)
 Requesting a shipping address is done in three steps.
 
-First, you'll need to set `requestShipping` to `true` within `PaymentOptions`.
+First, you'll need to set `requestShipping` (`requestBilling` for billing address) to `true` within `PaymentOptions`.
 
 ```es6
 const OPTIONS = {
-  requestShipping: true
+  requestShipping: true,
+  requestBilling: true,
 };
 ```
 
@@ -291,11 +292,13 @@ const DETAILS = {
 };
 ```
 
+Then you can get shipping (or billing) address from `paymentResponse._details.shippingContact` (`paymentResponse._details.billingContact`).
+
 Lastly, you'll need to register event listeners for when a user selects a `shippingAddress` and/or a `shippingOption`.  In the callback each event, you'll need to provide new `PaymentDetails` that will update your PaymentRequest.
 
 ```es6
 paymentRequest.addEventListener('shippingaddresschange', e => {
-  const updatedDetails = getUpdatedDetailsForShippingAddress(paymentRequest.shippingAddress;
+  const updatedDetails = getUpdatedDetailsForShippingAddress(paymentRequest.shippingAddress);
 
   e.updateWith(updatedDetails);
 });
@@ -304,6 +307,25 @@ paymentRequest.addEventListener('shippingoptionchange', e => {
   const updatedDetails = getUpdatedDetailsForShippingOption(paymentRequest.shippingOption);
 
   e.updateWith(updatedDetails);
+});
+```
+
+Note: `shippingaddresschange` and `shippingoptionchange` aren't triggered at the first time to open the Apple Pay dialog, so `firstupdate` event's been added. This is needed to update the tax or shipping price based on shipping contact at the first time.
+
+```es6
+paymentRequest.addEventListener('firstupdate', () => {
+  let updatedDetails = DETAILS;
+  const shippingOption = paymentRequest._shippingOption;
+  const shippingAddress = paymentRequest._shippingAddress;
+
+  if (shippingOption) {
+    updatedDetails = getUpdatedDetailsWithShippingOptionChange(shippingOption, updatedDetails);
+  }
+  if (shippingAddress) {
+    updatedDetails = getUpdatedDetailsWithShippingAddressChange(shippingAddress, updatedDetails);
+  }
+
+  return updatedDetails;
 });
 ```
 

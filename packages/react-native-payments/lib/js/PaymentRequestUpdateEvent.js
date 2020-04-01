@@ -67,8 +67,11 @@ export default class PaymentRequestUpdateEvent {
 
     /**********************************************************/
     if (this.firstUpdate) {
-      this.firstUpdate = false
-      value = target._handleFirstUpdate()
+      this.firstUpdate = false;
+      const firstUpdatedValue = target._handleFirstUpdate();
+      if (firstUpdatedValue) {
+        value = firstUpdatedValue;
+      }
     }
     /**********************************************************/
 

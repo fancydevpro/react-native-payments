@@ -261,7 +261,7 @@ export default class PaymentRequest {
 
   /**************************************************************/
   _handleFirstUpdate() {
-    return this._firstUpdateFn();
+    return this._firstUpdateFn ? this._firstUpdateFn() : undefined;
   }
   /**************************************************************/
 
